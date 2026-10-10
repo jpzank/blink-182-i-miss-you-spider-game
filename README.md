@@ -1,4 +1,4 @@
-# I Miss You — A blink-182 Fan Game
+# I Miss You — A blink-182 Game
 
 Explore a candlelit mansion **as a spider**, inspired by the atmosphere of blink-182’s *I Miss You* music video. Find three silk threads, cross the gallery and garden, and reach the spider waiting at the window.
 

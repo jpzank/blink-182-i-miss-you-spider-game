@@ -11,7 +11,7 @@
   "dependencies": {
     "three": "0.186.1"
   },
-  "description": "An open-source first-person spider fan game inspired by blink-182\u2019s I Miss You.",
+  "description": "An open-source first-person spider game inspired by blink-182\u2019s I Miss You.",
   "license": "MIT",
   "repository": {
     "type": "git",
