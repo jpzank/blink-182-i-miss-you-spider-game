@@ -17,7 +17,7 @@
     "type": "git",
     "url": "https://github.com/jpzank/blink-182-i-miss-you-spider-game.git"
   },
-  "homepage": "https://entre-os-fios.jpzank.chatgpt.site/",
+  "homepage": "https://blink-182-i-miss-you-spider-game.vercel.app/",
   "engines": {
     "node": ">=22"
   }

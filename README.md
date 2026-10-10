@@ -2,7 +2,7 @@
 
 Explore a candlelit mansion **as a spider**, inspired by the atmosphere of blink-182’s *I Miss You* music video. Find three silk threads, cross the gallery and garden, and reach the spider waiting at the window.
 
-**[Play the game](https://entre-os-fios.jpzank.chatgpt.site/)** · **[Contribute](CONTRIBUTING.md)** · **[Roadmap](docs/ROADMAP.md)** · **[Asset credits](THIRD_PARTY_NOTICES.md)**
+**[Play the game](https://blink-182-i-miss-you-spider-game.vercel.app/)** · **[Contribute](CONTRIBUTING.md)** · **[Roadmap](docs/ROADMAP.md)** · **[Asset credits](THIRD_PARTY_NOTICES.md)**
 
 ![The mansion, band and spider in the browser game](dist/share-en.png)
 
@@ -68,7 +68,7 @@ The reclining scene is on the right of the entrance, beneath the window. Climb t
 | `assets-src/`, `scripts/` | Editable art sources and Blender builders |
 | `tests/` | Progression, music and asset checks |
 
-This is a buildless static game. Publish the contents of `dist/` with any static host. Contributions and CI do **not** deploy to the existing live site automatically.
+This is a buildless static game. Vercel serves `dist/` and deploys the `main` branch. Pull requests can get preview deployments; changes from forks require owner authorization in Vercel. GitHub validation CI runs checks separately. See [deployment instructions](docs/DEPLOYMENT.md).
 
 ## Editing the art
 

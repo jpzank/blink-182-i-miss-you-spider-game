@@ -31,7 +31,7 @@ For a larger gameplay change or replacement of a major character, open a proposa
 
 ## Validation and review
 
-CI runs the existing Node tests and JavaScript syntax checks with read-only permissions. It never deploys the game. Clearly distinguish checks that passed from checks you could not run. A viewport resized on a desktop is not physical-device testing.
+GitHub CI runs the existing Node tests and JavaScript syntax checks with read-only permissions. Vercel deploys `main` to production and can create PR previews; fork previews require owner authorization. Clearly distinguish checks that passed from checks you could not run. A viewport resized on a desktop is not physical-device testing.
 
 Do not commit `.env` files, credentials, local deployment settings, caches or Blender backup files. Avoid unrelated dependency changes. Check peer dependencies and runtime requirements before a major upgrade, and update the lockfile together with the dependency declaration.
 

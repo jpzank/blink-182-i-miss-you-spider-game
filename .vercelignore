@@ -1,0 +1,8 @@
+node_modules/
+assets-src/
+*.blend1
+*.blend2
+.openai/
+.env
+.env.*
+.DS_Store

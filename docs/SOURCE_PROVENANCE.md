@@ -6,4 +6,6 @@ The initial public snapshot preserves the baseline's gameplay code and decoded i
 
 Editable Blender sources were repacked to contain their image resources and use relative paths. Their ready-to-use GLB exports were not changed. Local deployment configuration, workspace-only notes, older QA screenshots, backups and workstation-specific generated-image paths were excluded. The managed hosting repository retains its original history separately; this public repository starts with one reviewable baseline commit.
 
-No production credentials are required. Serving `dist/` is sufficient to play. GitHub contributions and workflow runs do not automatically publish the existing live site.
+No production credentials are required. Serving `dist/` is sufficient to play. Vercel now hosts the game and deploys `main`. GitHub CI validates code; Vercel handles deployment.
+
+On 2026-10-10, the game moved to Vercel. Sharing metadata and links now use the Vercel address, and the in-game X share button uses the current origin so forks can share their own deployment. The game assets and mechanics remain those of revision 7.
