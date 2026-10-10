@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#121a1b">
+<title>Between the Threads · A little night adventure</title>
+<meta name="description" content="Become a spider in a living mansion. Explore, cross silk threads and find who waits on the other side. A free minigame for desktop and mobile.">
+<meta property="og:type" content="website"><meta property="og:title" content="Between the Threads"><meta property="og:description" content="A tiny spider. A living mansion. Someone waiting on the other side."><meta property="og:image" content="https://entre-os-fios.jpzank.chatgpt.site/share-en.png"><meta property="og:url" content="https://entre-os-fios.jpzank.chatgpt.site"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Between the Threads"><meta name="twitter:description" content="Enter the mansion. Find your way."><meta name="twitter:image" content="https://entre-os-fios.jpzank.chatgpt.site/share-en.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg"><link rel="stylesheet" href="style.css?v=7">
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head>
+<body>
+<canvas id="world" aria-label="3D mansion seen through the eyes of a spider"></canvas>
+<div class="vignette" aria-hidden="true"></div><div class="grain" aria-hidden="true"></div>
+<header><a class="wordmark" href="./" aria-label="Between the Threads, home"><svg viewBox="0 0 40 44" aria-hidden="true"><path d="M20 0v13M17 18L6 9M16 22L2 19M16 25L3 30M18 28L10 41M23 18L34 9M24 22L38 19M24 25L37 30M22 28L30 41"/><ellipse cx="20" cy="26" rx="5" ry="8"/><circle cx="20" cy="17" r="3"/></svg><span>BETWEEN THE THREADS</span></a><div class="top-actions"><button id="video-toggle" class="icon-button" aria-label="Hide video" aria-controls="music-panel" aria-expanded="true" title="Hide video"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3Z"/></svg><span>Hide video</span></button><button id="sound" class="icon-button" aria-label="Play I Miss You" aria-pressed="false">♪ <span>I Miss You</span></button><button id="pause" class="icon-button" hidden aria-label="Pause game">Ⅱ</button></div></header>
+<main id="intro" class="intro">
+<div class="eyebrow"><i></i> A LITTLE NIGHT ADVENTURE</div>
+<h1>Someone waits<br>on the other side<br><em>of the thread.</em></h1>
+<p class="intro-copy">The music starts. The house awakens.<br>Find your way through the night.</p>
+<button id="start" class="primary" disabled><span>Preparing the mansion</span><span aria-hidden="true">↗</span></button>
+<p class="duration">ONE SPIDER · THREE THREADS · ONE NIGHT</p>
+<div class="instructions"><p class="desktop-guide"><kbd>W A S D</kbd> move <span>·</span> drag to look <span>·</span> <kbd>E</kbd> weave</p><p class="touch-guide">Use the left stick to move. Drag on the right to look.</p></div>
+</main>
+<footer id="intro-footer"><span>INSPIRED BY THE ATMOSPHERE OF <em>I MISS YOU</em></span><a href="https://www.youtube.com/watch?v=s1tAYmMjLdY" target="_blank" rel="noopener">Watch the original video ↗</a><span class="fan-note">AN INDEPENDENT REIMAGINING</span></footer>
+<section id="hud" hidden aria-label="Game information">
+<div class="chapter"><span id="area">01 / THE HALL</span><h2 id="objective">Follow the first thread.</h2><p id="subobjective">A vibration comes from the gallery.</p></div>
+<div class="progress" aria-label="Connected threads"><span id="progress-label">THREADS RECONNECTED</span><div><i></i><i></i><i></i><b id="count">0 / 3</b></div></div>
+<div class="crosshair" aria-hidden="true"></div>
+<div id="waypoint"><span>◇</span><small id="distance"></small></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div class="bottom-bar"><button id="sense" class="quiet">◎ <span>Sense the thread</span><kbd>Q</kbd></button><div class="cycle"><span id="cycle-label">THE NIGHT REPEATS</span><div><i id="cycle-fill"></i></div><small id="clock">0:00 / 3:49</small></div><span class="desktop-hint">WASD move · drag to look</span></div>
+<button id="interact" class="interact" hidden><span id="action-label">Weave and cross</span><kbd>E</kbd></button>
+<div id="joystick" aria-label="Movement joystick"><div></div></div><div id="look-hint">drag to look</div>
+</section>
+<section id="pause-screen" class="overlay" hidden><div class="panel"><span class="eyebrow">THE HOUSE CAN WAIT</span><h2>A little<br><em>breathing room.</em></h2><button id="resume" class="primary">Continue <span>↗</span></button><label class="setting"><input type="checkbox" id="steady"> Steady camera</label><button id="restart" class="quiet">Restart the adventure</button><p>WASD / arrow keys: move<br>Drag: look · E: weave · Q: sense<br>Esc: pause</p></div></section>
+<section id="ending" class="overlay" hidden><div class="panel"><span class="eyebrow">YOU MADE IT</span><h2>Some threads<br><em>are never lost.</em></h2><p>On the other side of the night,<br>someone was looking for you, too.</p><div class="result"><span>THREE THREADS. ONE REUNION.</span><strong id="finish-time"></strong></div><button id="share" class="primary">Share on X <span>↗</span></button><button id="again" class="quiet">Explore again</button></div></section>
+<section id="error" class="overlay" hidden><div class="panel"><h2>The mansion could not open.</h2><p id="error-message">This game requires WebGL. Try an up-to-date browser.</p><button onclick="location.reload()" class="primary">Try again</button></div></section>
+<aside id="music-panel" aria-label="Official video and soundtrack"><div class="music-heading"><span>THE VIDEO PLAYS WITH YOU</span><button id="video-close" aria-label="Close video" title="Close video"><span aria-hidden="true">×</span></button></div><div id="clip-player"></div><p id="music-status" role="status">Loading the official video…</p><a id="music-link" href="https://www.youtube.com/watch?v=s1tAYmMjLdY" target="_blank" rel="noopener" hidden>Open on YouTube ↗</a></aside>
+<output id="game-state" hidden></output><output id="music-state" hidden></output>
+<script type="module" src="game.js?v=7"></script>
+</body></html>

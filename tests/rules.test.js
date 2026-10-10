@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {createState,connect,canFinish,cycleAt,birdBlocking,formatTime,moveClamped,NODES} from '../dist/rules.js';
+test('only the current thread can advance progress, once, during play',()=>{const s=createState();assert.equal(connect(s,'gallery'),false);s.phase='playing';assert.equal(connect(s,'window'),false);for(const node of NODES){assert.equal(connect(s,node.id),true);assert.equal(connect(s,node.id),false)}assert.equal(s.collected.length,3);});
+test('ending requires all threads and actual proximity',()=>{const s=createState();s.phase='playing';assert.equal(canFinish(s,1),false);NODES.forEach(n=>connect(s,n.id));assert.equal(canFinish(s,3),false);assert.equal(canFinish(s,1.5),true);s.phase='paused';assert.equal(canFinish(s,1),false)});
+test('cycle repeats without clearing progress and bird never permanently blocks',()=>{assert.equal(cycleAt(230),1);assert.equal(birdBlocking(205),true);assert.equal(birdBlocking(211),false);assert.equal(birdBlocking(434),true);assert.equal(birdBlocking(458),false)});
+test('world edges and time formatting remain bounded',()=>{assert.deepEqual(moveClamped(11,11,100,100),{x:11.5,z:11.5});assert.deepEqual(moveClamped(-11,-26,-100,-100),{x:-11.5,z:-27});assert.equal(formatTime(229),'3:49');assert.equal(formatTime(-1),'0:00')});

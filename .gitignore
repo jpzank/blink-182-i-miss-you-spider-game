@@ -1,0 +1,11 @@
+node_modules/
+.DS_Store
+*.tar.gz
+*.blend1
+*.blend2
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+.openai/

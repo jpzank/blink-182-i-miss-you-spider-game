@@ -1,0 +1,131 @@
+{
+  "image": "facial-atlas-v1.png",
+  "width": 2172,
+  "height": 724,
+  "coordinateSystem": "pixel coordinates, top-left origin, approximate visual estimates ±8 px; eyes are image-left and image-right",
+  "columns": [
+    {
+      "identity": "Mark Hoppus",
+      "columnBounds": [
+        0,
+        0,
+        724,
+        724
+      ],
+      "headBounds": [
+        134,
+        8,
+        618,
+        638
+      ],
+      "headTop": [
+        374,
+        8
+      ],
+      "chin": [
+        374,
+        635
+      ],
+      "eyes": [
+        [
+          293,
+          307
+        ],
+        [
+          468,
+          307
+        ]
+      ],
+      "noseTip": [
+        379,
+        409
+      ],
+      "mouthCenter": [
+        381,
+        499
+      ]
+    },
+    {
+      "identity": "Tom DeLonge",
+      "columnBounds": [
+        724,
+        0,
+        1448,
+        724
+      ],
+      "headBounds": [
+        846,
+        3,
+        1327,
+        645
+      ],
+      "headTop": [
+        1082,
+        3
+      ],
+      "chin": [
+        1085,
+        640
+      ],
+      "eyes": [
+        [
+          1003,
+          307
+        ],
+        [
+          1171,
+          307
+        ]
+      ],
+      "noseTip": [
+        1089,
+        415
+      ],
+      "mouthCenter": [
+        1088,
+        506
+      ]
+    },
+    {
+      "identity": "Travis Barker",
+      "columnBounds": [
+        1448,
+        0,
+        2172,
+        724
+      ],
+      "headBounds": [
+        1562,
+        3,
+        2040,
+        650
+      ],
+      "headTop": [
+        1798,
+        3
+      ],
+      "chin": [
+        1801,
+        645
+      ],
+      "eyes": [
+        [
+          1715,
+          297
+        ],
+        [
+          1881,
+          297
+        ]
+      ],
+      "noseTip": [
+        1801,
+        414
+      ],
+      "mouthCenter": [
+        1796,
+        515
+      ]
+    }
+  ]
+}

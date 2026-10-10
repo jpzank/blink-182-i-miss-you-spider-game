@@ -1,0 +1,31 @@
+{
+  "triangles": 96776,
+  "vertices": 48572,
+  "height": 1.52,
+  "bodyLengthWithoutTail": 1.94,
+  "totalBoundsApprox": {
+    "x": [
+      -1.32,
+      0.42
+    ],
+    "y": [
+      -0.93,
+      1.52
+    ],
+    "z": [
+      0,
+      1.52
+    ]
+  },
+  "clip": "Sphynx grooming \u2022 8s",
+  "root": "Sphynx",
+  "bones": [
+    "body",
+    "head",
+    "paw",
+    "tail"
+  ],
+  "glbBytes": 5224600,
+  "images": 3,
+  "animationDuration": 8
+}

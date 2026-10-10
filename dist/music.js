@@ -1,0 +1,16 @@
+// Official YouTube player with a dismissible panel. No redistributed recording.
+export class ClipMusic {
+ constructor(){this.player=null;this.ready=false;this.wanted=false;this.running=false;this.error=false;this.time=0;this.phase='intro';this.status=document.querySelector('#music-status');this.button=document.querySelector('#sound');this.panel=document.querySelector('#music-panel');this.videoToggle=document.querySelector('#video-toggle');this.videoVisible=true;
+  this.videoToggle.onclick=()=>this.setPanelVisible(!this.videoVisible);document.querySelector('#video-close').onclick=()=>{this.setPanelVisible(false);this.videoToggle.focus();};
+  window.onYouTubeIframeAPIReady=()=>{this.player=new YT.Player('clip-player',{width:356,height:200,videoId:'s1tAYmMjLdY',playerVars:{playsinline:1,rel:0,hl:'en',origin:location.origin},events:{onReady:()=>{this.ready=true;this.message('Video ready. Music starts when you enter.');if(this.wanted&&this.phase==='playing')this.play();},onStateChange:e=>{this.running=e.data===1;this.button.setAttribute('aria-pressed',String(this.running));this.button.querySelector('span').textContent=this.running?'Pause music':'Play I Miss You';this.button.setAttribute('aria-label',this.running?'Pause music':'Play I Miss You');if(this.running){this.error=false;this.message('I Miss You · blink-182');}this.report();if(e.data===0&&this.wanted&&this.phase==='playing'){this.player.seekTo(0,true);this.player.playVideo();}},onAutoplayBlocked:()=>this.message('Press ▶ in the video to start the music.'),onError:e=>{this.error=true;this.running=false;this.message('YouTube is unavailable here. Open the original video ↗');document.querySelector('#music-link').hidden=false;}}});};
+  const script=document.createElement('script');script.src='https://www.youtube.com/iframe_api';script.onerror=()=>{this.message('YouTube could not load. Open the video ↗');document.querySelector('#music-link').hidden=false;};document.head.append(script);
+ }
+ setPanelVisible(visible){this.videoVisible=visible;this.panel.hidden=!visible;const label=visible?'Hide video':'Show video';this.videoToggle.setAttribute('aria-expanded',String(visible));this.videoToggle.setAttribute('aria-label',label);this.videoToggle.setAttribute('title',label);this.videoToggle.querySelector('span').textContent=label;this.report();}
+ message(text){this.status.textContent=text;}
+ play(){this.wanted=true;if(this.ready){this.player.unMute();this.player.setVolume(75);this.player.playVideo();this.message('Starting I Miss You…');}else this.message('Loading the video…');}
+ start(){this.wanted=true;if(this.ready)this.player.seekTo(0,true);this.play();}
+ toggle(){if(this.running){this.wanted=false;this.player.pauseVideo();this.message('Music paused');}else this.play();}
+ setPhase(phase){this.phase=phase;if(phase==='paused'||phase==='intro'||phase==='won'){if(this.ready)this.player.pauseVideo();}else if(phase==='playing'&&this.wanted)this.play();}
+ clock(fallback){if(this.ready&&this.running){const t=this.player.getCurrentTime();if(Number.isFinite(t))this.time=t;return this.time;}return this.ready&&!this.error&&this.time>0?this.time:fallback;}
+ report(){document.querySelector('#music-state').textContent=JSON.stringify({ready:this.ready,playing:this.running,time:+this.time.toFixed(1),error:this.error,videoVisible:this.videoVisible});}
+}
