@@ -439,7 +439,9 @@ def hair_shell(role,rig,body,F):
  keep=max(len(p) for p in parts)*.05
  bmesh.ops.delete(bm,geom=[f for p in parts if len(p)<keep for f in p],context='FACES')
  bm.normal_update()
- bmesh.ops.subdivide_edges(bm,edges=bm.edges[:],cuts=1,use_grid_fill=True,smooth=1.0)
+ # Travis's crest is narrow and sharply curved, so it gets a denser grid:
+ # its rounded profile and its outline against the scalp stay smooth.
+ bmesh.ops.subdivide_edges(bm,edges=bm.edges[:],cuts=3 if role=='Drummer' else 1,use_grid_fill=True,smooth=1.0)
  bm.normal_update()
  rng=random.Random({'Bassist':4,'Guitarist':5,'Drummer':6}[role])
  # Clump centres for Mark's spikes, scattered over the top of the head.
