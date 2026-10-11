@@ -56,7 +56,8 @@ def head_uv(role,ob,rig):
  for i in face:
   c=me.polygons[i].center;r=Vector((c.x,c.y-head_axis(F),0)).normalized()
   hit=bvh.ray_cast(c+r*2,-r)
-  if hit[2] is not None and hit[2]!=i and hit[3]<2-1e-4:hidden.add(i)
+  # Only faces that are themselves wrapped can overlap it (ears are not).
+  if hit[2] is not None and hit[2]!=i and hit[2] in face and hit[3]<2-1e-4:hidden.add(i)
  face-=hidden
  uvl=me.uv_layers.new(name='HeadUV')
  bpy.ops.object.select_all(action='DESELECT');ob.select_set(True);bpy.context.view_layer.objects.active=ob
@@ -64,7 +65,10 @@ def head_uv(role,ob,rig):
  bpy.ops.object.mode_set(mode='EDIT');bpy.ops.mesh.select_all(action='DESELECT')
  bm=bmesh.from_edit_mesh(me);bm.faces.ensure_lookup_table()
  rest=heads-face
- for f in bm.faces:f.select=f.index in rest
+ bpy.context.tool_settings.mesh_select_mode=(False,False,True)
+ # Select only; deselecting neighbours would also drop shared border verts.
+ for f in bm.faces:
+  if f.index in rest:f.select=True
  for e in bm.edges:
   idx=[f.index for f in e.link_faces]
   inr=[i in rest for i in idx]
@@ -72,6 +76,9 @@ def head_uv(role,ob,rig):
   if all(inr) and all(abs(v.co.x)<2e-3 and v.co.y>F['eye'].y+.12 for v in e.verts):e.seam=True
  bm.select_flush_mode();bmesh.update_edit_mesh(me)
  bpy.ops.uv.smart_project(angle_limit=math.radians(60),island_margin=.02,area_weight=0)
+ # Repack the remainder's islands tightly into the unit square.
+ bpy.context.scene.tool_settings.use_uv_select_sync=True
+ bpy.ops.uv.pack_islands(udim_source='CLOSEST_UDIM',rotate=True,margin=.01)
  bpy.ops.object.mode_set(mode='OBJECT')
  uvl=me.uv_layers['HeadUV']
  # Smart UV Project packs the remainder's islands into the unit square without
