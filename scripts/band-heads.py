@@ -399,6 +399,13 @@ def hair_card_material(role):
  nt.links.new(t.outputs['Alpha'],clip.inputs[0]);nt.links.new(clip.outputs[0],p.inputs['Alpha']);p.inputs['Roughness'].default_value=.5
  m.surface_render_method='DITHERED';return m
 
+def crest(X,Z,D,hm):
+ """Travis's mohawk thickness (in du): a rounded ridge that narrows to a
+ point and thins out toward the forehead, and fades out at the nape."""
+ front=smooth(1.84,2.35,Z) if D>-.9 else 1.0
+ w=.05+.19*front;prof=max(0,1-(abs(X)/w)**2)
+ return .36*prof*front*smooth(.3,.9,hm)*(.8+.2*math.sin(Z*19+X*9))
+
 def hair_shell(role,rig,body,F):
  """Hair mass grown from the scalp itself, so skin never shows between locks.
  Mark's gelled clumps and Travis's crest are sculpted into the mass; strand
@@ -408,7 +415,7 @@ def hair_shell(role,rig,body,F):
   X,Z,D=head_coords(v.co,F)
   if abs(X)>1.6 or Z<-2:continue
   hm=hairline(role,X,Z,D)
-  if role=='Drummer':hm*=1-smooth(.22,.30,abs(X))
+  if role=='Drummer':hm*=1-smooth(.36,.42,abs(X)) # wide strip; the crest is shaped by thickness
   vmask[v.index]=hm
  polys=[p for p in me.polygons if all(vmask.get(i,0)>=.3 for i in p.vertices) and is_head_poly(p.center,F)]
  bm=bmesh.new();vmap={}
@@ -441,7 +448,6 @@ def hair_shell(role,rig,body,F):
  fwd=Vector((0,-1,0));up=Vector((0,0,1))
  for v in bm.verts:
   X,Z,D=head_coords(v.co,F);hm=hairline(role,X,Z,D)
-  if role=='Drummer':hm*=1-smooth(.22,.30,abs(X))
   edge=smooth(.3,.8,hm);n=v.normal.copy();top=1-smooth(.5,.95,abs(X))
   if role=='Bassist':
    t=.05+.07*top*smooth(1.5,2.1,Z);spike=0
@@ -455,8 +461,9 @@ def hair_shell(role,rig,body,F):
    disp=n*du*t+fwd*du*.05*smooth(1.8,2.3,Z)*top
    az=math.atan2(X,D+.9);disp+=n*du*.035*math.sin(az*23+Z*3.1+math.sin(az*7)*2)*smooth(1.0,1.8,Z)
   else:
-   ridge=max(0,1-abs(X)/.26)**1.3
-   disp=n*du*(.04+.30*ridge*smooth(1.7,2.1,Z)*(.75+.25*math.sin(Z*19+X*9)))
+   # Where the crest thins out the volume sinks just under the buzzed scalp,
+   # so its visible outline is the smooth skin intersection, not polygon edges.
+   v.co=v.co+n*du*(crest(X,Z,D,hm)-.03);continue
   v.co=v.co+disp*edge
  # Strands radiate from the crown whorl: polar angle -> v, azimuth -> u.
  centre=Vector((0,F['eye'].y+.9*du,F['eye'].z+.4*du));crown=Vector((0,.45,1)).normalized()
@@ -529,7 +536,7 @@ def hair_cards(role,rig,body):
   spikes(420,lambda X,Z,D:du*.42,du*.12,lambda c,n,X,Z,D:(n*.55+fwd*.6+Vector((-.4,0,0))).normalized(),lambda X,Z,D:abs(X)<.7 and Z>1.8)
  else:
   # Short spiked mohawk strip from the hairline over the crown.
-  spikes(240,lambda X,Z,D:du*(.36+.14*smooth(1.9,2.3,Z)),du*.08,lambda c,n,X,Z,D:(n+up*.2-fwd*.2).normalized(),lambda X,Z,D:abs(X)<.12)
+  spikes(240,lambda X,Z,D:du*(.12+.38*(smooth(1.84,2.35,Z) if D>-.9 else 1)),du*.08,lambda c,n,X,Z,D:(n+up*.2-fwd*.2).normalized(),lambda X,Z,D:abs(X)<.6*(.05+.19*(smooth(1.84,2.35,Z) if D>-.9 else 1)) and (Z>1.95 or D<-.9))
  o=rigid_mesh(MEMBERS[role][0]+' hairstyle',verts,faces,hair_card_material(role),rig)
  layer=o.data.uv_layers.new(name='UVMap')
  for poly in o.data.polygons:
