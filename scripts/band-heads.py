@@ -417,6 +417,20 @@ def hair_shell(role,rig,body,F):
    if i not in vmap:
     nv=bm.verts.new(me.vertices[i].co);nv.normal=me.vertices[i].normal;vmap[i]=nv
   bm.faces.new([vmap[i] for i in p.vertices])
+ # Keep only the connected hair mass: a lone polygon that passes the hairline
+ # mask (temples, mouth cavity) would otherwise float as a dark patch.
+ bm.faces.ensure_lookup_table();seen=set();parts=[]
+ for f0 in bm.faces:
+  if f0 in seen:continue
+  stack=[f0];seen.add(f0);part=[]
+  while stack:
+   f=stack.pop();part.append(f)
+   for e in f.edges:
+    for g in e.link_faces:
+     if g not in seen:seen.add(g);stack.append(g)
+  parts.append(part)
+ keep=max(len(p) for p in parts)*.05
+ bmesh.ops.delete(bm,geom=[f for p in parts if len(p)<keep for f in p],context='FACES')
  bm.normal_update()
  bmesh.ops.subdivide_edges(bm,edges=bm.edges[:],cuts=1,use_grid_fill=True,smooth=1.0)
  bm.normal_update()
