@@ -9,7 +9,7 @@ The root MIT license applies to original project code and original project-autho
 | Poly Haven Sofa 03 and Gothic Coffee Table | `dist/models/sofa_03/`, `dist/models/gothic_coffee_table/` | CC0; [model sources](dist/models/SOURCES.md), [official license](https://polyhaven.com/license) |
 | Poly Haven photographic PBR textures | `dist/textures/` | CC0; [texture source list](dist/textures/SOURCES.md) |
 | Generated wall, rug, facial atlas and illustrative tattoo textures | `assets-src/`, `dist/textures/`; baked into band model | Project-authored generated material; [wall/rug prompts](assets-src/PROMPTS.md), [facial atlas provenance](assets-src/band-likeness/PROMPTS-AND-PROVENANCE.md), [tattoo provenance](assets-src/band-likeness/TATTOO-PROMPT-AND-PROVENANCE.md) |
-| Spider, bed, Sphynx, character adaptation, costumes and animation | `dist/spider.js`, `dist/alcove.js`, `scripts/`, `assets-src/` | Original project work, with the CC0 character bases noted above; [women provenance](assets-src/reclining-women/PROVENANCE.md), [Sphynx provenance](assets-src/sphynx/PROVENANCE.md) |
+| Spider, bed, Sphynx, character adaptation, procedural hair/eye/skin-relief textures, skin shading, costumes and animation | `dist/spider.js`, `dist/alcove.js`, `dist/skin.js`, `scripts/`, `assets-src/` | Original project work, with the CC0 character bases noted above; [women provenance](assets-src/reclining-women/PROVENANCE.md), [Sphynx provenance](assets-src/sphynx/PROVENANCE.md) |
 
 MakeHuman's application source has a separate copyleft license; this repository includes its CC0 asset data, not the MakeHuman application. The custom Blender builders are project code. Blender itself is not distributed here.
 

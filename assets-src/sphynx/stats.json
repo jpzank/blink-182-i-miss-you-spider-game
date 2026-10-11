@@ -1,31 +1,27 @@
 {
-  "triangles": 96776,
-  "vertices": 48572,
-  "height": 1.52,
-  "bodyLengthWithoutTail": 1.94,
-  "totalBoundsApprox": {
-    "x": [
-      -1.32,
-      0.42
-    ],
-    "y": [
-      -0.93,
-      1.52
-    ],
-    "z": [
-      0,
-      1.52
-    ]
-  },
+  "triangles": 27904,
+  "vertices": 13940,
+  "glbBytes": 2485060,
   "clip": "Sphynx grooming \u2022 8s",
   "root": "Sphynx",
   "bones": [
     "body",
+    "spine",
+    "neck",
     "head",
+    "ear.L",
+    "ear.R",
+    "arm.L",
+    "forearm.L",
+    "hand.L",
+    "arm.R",
+    "forearm.R",
     "paw",
-    "tail"
+    "tail",
+    "tail.001",
+    "tail.002",
+    "tail.003",
+    "tail.004"
   ],
-  "glbBytes": 5224600,
-  "images": 3,
-  "animationDuration": 8
+  "animationDuration": 8.0
 }

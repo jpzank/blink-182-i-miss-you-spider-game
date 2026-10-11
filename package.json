@@ -6,7 +6,7 @@
   "scripts": {
     "start": "python3 -m http.server 4173 -d dist",
     "test": "node --test tests/*.test.js",
-    "check": "node --check dist/game.js && node --check dist/world.js && node --check dist/rules.js && node --check dist/music.js && node --check dist/audio.js && node --check dist/spider.js && node --check dist/musicians.js && node --check dist/alcove.js"
+    "check": "node --check dist/game.js && node --check dist/world.js && node --check dist/rules.js && node --check dist/music.js && node --check dist/audio.js && node --check dist/spider.js && node --check dist/musicians.js && node --check dist/alcove.js && node --check dist/skin.js"
   },
   "dependencies": {
     "three": "0.186.1"

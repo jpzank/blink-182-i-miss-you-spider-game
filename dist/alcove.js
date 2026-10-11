@@ -1,6 +1,7 @@
 import * as T from './vendor/three.module.js';
 import {GLTFLoader} from './vendor/addons/loaders/GLTFLoader.js';
 import {RoundedBoxGeometry} from './vendor/addons/geometries/RoundedBoxGeometry.js';
+import {skin,eye} from './skin.js?v=8';
 
 // The reclining scene lives beside the salon window, within the existing map.
 // Its cover trails onto the floor so a spider can climb up to the mattress.
@@ -59,11 +60,19 @@ export function createAlcove(scene,materials,walkables,flame){
 
  const loader=new GLTFLoader(),mixers=[];
  function finish(model){model.traverse(o=>{if(!o.isMesh)return;o.castShadow=true;o.receiveShadow=true;o.frustumCulled=false;for(const m of Array.isArray(o.material)?o.material:[o.material]){if(m.map)m.map.anisotropy=4;m.roughness=Math.max(.4,m.roughness);if(m.transparent||m.alphaMap){m.alphaTest=.35;m.transparent=false;m.depthWrite=true;m.side=T.DoubleSide;}}});}
+ // Sphynx: velvet sheen of the fine down, red-shifted light bleed and ears
+ // that glow when the lamp is behind them (the exported 'Thin' mask).
+ function sphynx(model){model.traverse(o=>{if(!o.isMesh)return;
+  if(o.material.name==='Sphynx skin'){const old=o.material;const m=new T.MeshPhysicalMaterial({name:old.name,map:old.map,normalMap:old.normalMap,roughnessMap:old.roughnessMap,roughness:1,sheen:.35,sheenRoughness:.75,sheenColor:new T.Color('#f3c9b6'),envMapIntensity:.8});
+   const g=o.geometry;if(g.getAttribute('color')){g.setAttribute('thin',g.getAttribute('color'));g.deleteAttribute('color');}
+   skin(m,{thin:'thin',wrap:[.5,.24,.18],glow:'#f07a66',strength:.4});old.dispose();o.material=m;}
+  if(o.material.name==='Sphynx eyes'){o.material=eye(o.material);o.material.roughness=.35;o.castShadow=false;}
+ });}
  const women=new T.Group();women.name='Duas mulheres reclinadas';women.position.set(8.5,1.25,8.4);scene.add(women);
  const cat=new T.Group();cat.name='Gato sem pelos';cat.position.set(4.15,.04,4.9);cat.rotation.y=-.85;scene.add(cat);
  const ready=Promise.all([
   loader.loadAsync('./models/reclining-women-v6.glb').then(gltf=>{finish(gltf.scene);women.add(gltf.scene);gltf.scene.traverse(o=>{if(o.isMesh)walkables.push(o);});const mixer=new T.AnimationMixer(gltf.scene);gltf.animations.forEach(a=>mixer.clipAction(a).play());mixers.push(mixer);}),
-  loader.loadAsync('./models/sphynx-v6.glb').then(gltf=>{finish(gltf.scene);cat.add(gltf.scene);const mixer=new T.AnimationMixer(gltf.scene);gltf.animations.forEach(a=>mixer.clipAction(a).play());mixers.push(mixer);})
+  loader.loadAsync('./models/sphynx-v7.glb').then(gltf=>{finish(gltf.scene);sphynx(gltf.scene);gltf.scene.scale.setScalar(1.18);cat.add(gltf.scene);const mixer=new T.AnimationMixer(gltf.scene);gltf.animations.forEach(a=>mixer.clipAction(a).play());mixers.push(mixer);})
  ]);
  return {ready,cat,women,update(t){for(const mixer of mixers)mixer.setTime(t);}};
 }

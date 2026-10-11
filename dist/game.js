@@ -4,7 +4,7 @@ import {RenderPass} from './vendor/addons/postprocessing/RenderPass.js';
 import {SSAOPass} from './vendor/addons/postprocessing/SSAOPass.js';
 import {OutputPass} from './vendor/addons/postprocessing/OutputPass.js';
 import {RoomEnvironment} from './vendor/addons/environments/RoomEnvironment.js';
-import {makeWorld} from './world.js?v=7';
+import {makeWorld} from './world.js?v=8';
 import {Ambience} from './audio.js?v=7';
 import {ClipMusic} from './music.js?v=7';
 import {NODES,HOME,createState,connect,cycleAt,birdBlocking,canFinish,formatTime,moveClamped} from './rules.js?v=7';
