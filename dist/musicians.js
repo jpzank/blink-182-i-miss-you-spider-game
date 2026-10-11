@@ -1,19 +1,35 @@
 import * as T from './vendor/three.module.js';
 import {GLTFLoader} from './vendor/addons/loaders/GLTFLoader.js';
+import {skin,eye,hairCards} from './skin.js?v=8';
+// Strand cards share one neutral texture; each musician's hair colour is applied here.
+const HAIR={'Mark Hoppus hair':'#3a3330','Tom DeLonge hair':'#3d3330','Travis Barker hair':'#262322'};
 // Eight-beat performance loops share the video clock. Each singer has an
 // independent, restrained jaw/neck gesture in his sections of the clip.
 export function loadMusicians(scene){
  let mixer;const singers=[];
- const ready=new GLTFLoader().loadAsync('./models/musicians-v5.glb').then(gltf=>{
+ const ready=new GLTFLoader().loadAsync('./models/musicians-v6.glb').then(gltf=>{
   const root=gltf.scene;root.name='Mark, Tom e Travis';
   root.traverse(o=>{if(!o.isMesh)return;o.castShadow=true;o.receiveShadow=true;o.frustumCulled=false;
    const mats=Array.isArray(o.material)?o.material:[o.material];
-   for(const mat of mats){mat.roughness=Math.max(.48,mat.roughness);if(mat.map)mat.map.anisotropy=4;
-    if(mat.name.endsWith(' skin')){mat.color.set('#dfd3c8');mat.roughness=.78;}
+   mats.forEach((mat,i)=>{mat.roughness=Math.max(.48,mat.roughness);if(mat.map)mat.map.anisotropy=4;
+    if(mat.name.endsWith(' skin')){mat.color.set('#e6dbd0');mat.roughness=.74;skin(mat);}
+    if(mat.name.endsWith(' face')){mat.color.set('#ddd1c6');mat.roughness=1;skin(mat);if(mat.normalMap)mat.normalScale.set(.9,.9);}
+    if(mat.name.endsWith(' eyes')){const m=eye(mat);if(Array.isArray(o.material))o.material[i]=m;else o.material=m;}
+    if(mat.name.endsWith(' hair'))hairCards(mat,HAIR[mat.name]||'#2a211c');
+    if(mat.name.endsWith(' hair volume')){mat.color.set(HAIR[mat.name.replace(' volume','')]||'#2a211c').multiplyScalar(2.6);mat.roughness=.66;if(mat.normalMap)mat.normalScale.set(1.4,1.4);}
+    if(mat.name==='Band eyelashes'){mat.alphaTest=.35;mat.transparent=false;mat.side=T.DoubleSide;o.castShadow=false;}
     if(mat.name.includes('shoes'))mat.color.set('#24231f');
-    if(mat.name==='Tom dark fringe'){mat.color.set('#3e302a');mat.alphaTest=.38;mat.transparent=false;mat.side=T.DoubleSide;}
-   }
+   });
   });
+  // Strand cards: an alpha-tested core writes depth, and a blended copy
+  // drawn afterwards softens the cut-out edges (the composer has no MSAA).
+  // Both skip the SSAO normal pass, which would see whole card rectangles.
+  const cards=[];root.traverse(o=>{if(o.isMesh&&(o.material.name.endsWith(' hair')||o.material.name==='Band eyelashes'))cards.push(o);});
+  for(const o of cards){
+   o.userData.noSSAO=true;o.material.alphaTest=Math.max(o.material.alphaTest,.5);
+   const edge=o.clone();edge.material=o.material.clone();Object.assign(edge.material,{alphaTest:.04,transparent:true,depthWrite:false});
+   edge.castShadow=false;edge.userData.noSSAO=true;o.parent.add(edge);
+  }
   for(const [role,start,end] of [['Bassist',28,79],['Guitarist',80,219]]){
    const rig=root.getObjectByName(role);let jaw,neck;
    rig?.traverse(o=>{if(o.isBone&&o.name.startsWith('jaw'))jaw=o;if(o.isBone&&o.name.startsWith('neck01'))neck=o;});

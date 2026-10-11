@@ -6,7 +6,7 @@ from pathlib import Path
 from mathutils import Vector, Matrix
 ROOT=Path(__file__).resolve().parents[1]
 SRC=ROOT/'assets-src/makehuman'; SYSTEM=SRC/'system'
-bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
+bpy.ops.wm.read_factory_settings(use_empty=True) # no startup-file brush or UI references
 
 def objdata(path):
  vs=[];uv=[];faces=[];group='';groups={}
@@ -106,6 +106,7 @@ def garment(folder,name,rig,mat):
  v,u,f,g=objdata(folder/(name+'.obj'));fitted,w,deleted=proxy(folder/(name+'.mhclo'));assert len(fitted)==len(v),(name,len(fitted),len(v));ob=mesh(name,fitted,u,f,mat,rig,w);style_garment(role,ob);return deleted
 
 exec((ROOT/'scripts/band-details.py').read_text(),globals())
+exec((ROOT/'scripts/band-heads.py').read_text(),globals())
 
 FRAMES=133
 bpy.context.scene.render.fps=30
@@ -117,9 +118,9 @@ for role,position in [('Bassist',(-2.8,6.6,.42)),('Guitarist',(2.4,6.1,.42)),('D
  deleted=garment(SYSTEM/'clothes'/outfit,outfit,rig,outfitmat)
  deleted.update(garment(SYSTEM/'clothes/shoes01','shoes01',rig,shoe))
  body=mesh(MEMBERS[role][0]+' skin',morphed,uv,[(g,f) for g,f in faces if g=='body' and not any(i in deleted for i,j in f)],skin,rig,vw)
- skin_for_member(role,body,rig);member_hair(role,rig)
+ skin_for_member(role,body,rig);hair_cards(role,rig,body)
  if role=='Drummer':suspenders(rig,next(o for o in rig.children if o.name.startswith('male_casualsuit04')))
- v,u,f,g=objdata(SRC/'eyes.obj');fit,w,d=proxy(SRC/'eyes.mhclo');eyes_ob=mesh(role+' eyes',fit,u,f,eye,rig,w);member_eyes(role,eyes_ob)
+ v,u,f,g=objdata(SRC/'eyes.obj');fit,w,d=proxy(SRC/'eyes.mhclo');eyes_ob=mesh(role+' eyes',fit,u,f,eye,rig,w);layered_eyes(role,rig,eyes_ob);eyelashes(role,rig)
  # Anatomical two-segment arm solve; twist bones follow their limb rigidly.
  def aim_bone(name,head,direction):
   pb=rig.pose.bones[name];rest=pb.bone
@@ -190,6 +191,12 @@ for role,position in [('Bassist',(-2.8,6.6,.42)),('Guitarist',(2.4,6.1,.42)),('D
 for ob in list(bpy.data.objects):
  if ob.type=='EMPTY':bpy.data.objects.remove(ob,do_unlink=True)
 bpy.context.scene.frame_set(1);bpy.context.scene.render.fps=30
+bpy.context.scene.render.filepath='//'
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'assets-src/musicians.blend'))
-bpy.ops.export_scene.gltf(filepath=str(ROOT/'dist/models/musicians-v5.glb'),export_format='GLB',export_animations=True,export_force_sampling=True,export_nla_strips=False,export_image_format='AUTO',export_yup=True)
+# Keep the editable scene portable: project-relative image paths, packed pixels.
+bpy.ops.file.make_paths_relative();bpy.ops.file.pack_all()
+for im in bpy.data.images:
+ for pf in im.packed_files:pf.filepath=im.filepath # packing records absolute source paths
+bpy.ops.wm.save_mainfile()
+bpy.ops.export_scene.gltf(filepath=str(ROOT/'dist/models/musicians-v6.glb'),export_format='GLB',export_animations=True,export_force_sampling=True,export_nla_strips=False,export_image_format='AUTO',export_yup=True)
 print('MUSICIANS_READY',S,top-foot)

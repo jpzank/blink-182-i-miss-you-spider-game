@@ -4,7 +4,7 @@ import {RenderPass} from './vendor/addons/postprocessing/RenderPass.js';
 import {SSAOPass} from './vendor/addons/postprocessing/SSAOPass.js';
 import {OutputPass} from './vendor/addons/postprocessing/OutputPass.js';
 import {RoomEnvironment} from './vendor/addons/environments/RoomEnvironment.js';
-import {makeWorld} from './world.js?v=7';
+import {makeWorld} from './world.js?v=8';
 import {Ambience} from './audio.js?v=7';
 import {ClipMusic} from './music.js?v=7';
 import {NODES,HOME,createState,connect,cycleAt,birdBlocking,canFinish,formatTime,moveClamped} from './rules.js?v=7';
@@ -14,7 +14,7 @@ try{renderer=new T.WebGLRenderer({canvas,antialias:true,powerPreference:'high-pe
 renderer.setPixelRatio(Math.min(devicePixelRatio,matchMedia('(pointer:coarse)').matches?1.4:1.8));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=T.SRGBColorSpace;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;
 const scene=new T.Scene();scene.background=new T.Color('#172524');scene.fog=new T.FogExp2('#172122',.018);
 const camera=new T.PerspectiveCamera(64,innerWidth/innerHeight,.025,85);camera.rotation.order='YXZ';scene.add(camera);const pmrem=new T.PMREMGenerator(renderer);const room=new RoomEnvironment();scene.environment=pmrem.fromScene(room,.04).texture;scene.environmentIntensity=.19;room.dispose();pmrem.dispose();
-const composer=new EffectComposer(renderer);const ssao=new SSAOPass(scene,camera,innerWidth,innerHeight,16);ssao.kernelRadius=.5;ssao.minDistance=.001;ssao.maxDistance=.065;composer.addPass(new RenderPass(scene,camera));composer.addPass(ssao);composer.addPass(new OutputPass());
+const composer=new EffectComposer(renderer);const ssao=new SSAOPass(scene,camera,innerWidth,innerHeight,16);ssao.kernelRadius=.5;ssao.minDistance=.001;ssao.maxDistance=.065;{const hide=ssao._overrideVisibility.bind(ssao);ssao._overrideVisibility=()=>{hide();scene.traverse(o=>{if(o.userData.noSSAO&&o.visible){o.visible=false;ssao._visibilityCache.push(o);}});};}composer.addPass(new RenderPass(scene,camera));composer.addPass(ssao);composer.addPass(new OutputPass());
 scene.add(new T.HemisphereLight('#9aaeb1','#37271e',.2));const moonLight=new T.DirectionalLight('#9bbdce',.5);moonLight.position.set(10,16,-12);scene.add(moonLight);
 const chandelier=new T.PointLight('#ffcb8d',85,25,1.6);chandelier.position.set(0,7,0);scene.add(chandelier);
 const fireplace=new T.PointLight('#ffa05e',65,13,1.5);fireplace.position.set(9,1.6,-.6);scene.add(fireplace);

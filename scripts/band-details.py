@@ -1,7 +1,8 @@
-"""Period-specific anatomy, face projection, hair and costume for the band.
+"""Period-specific anatomy, face projection and costume for the band.
 
 Executed in the build-musicians.py context. Generated facial albedo is baked
-into the body's native UVs; nothing is projected at runtime.
+into the body's native UVs and, via band-heads.py, into a dedicated head UV;
+nothing is projected at runtime.
 """
 LIK=ROOT/'assets-src/band-likeness'
 LANDMARKS=json.load(open(LIK/'landmarks.json'))
@@ -28,6 +29,7 @@ def member_anatomy(role):
 
 def skin_for_member(role,ob,rig):
  idx=MEMBERS[role][1];member=MEMBERS[role][0];lm=LANDMARKS['columns'][idx]
+ heads,frame=head_uv(role,ob,rig)
  eyes=lm['eyes'];eye_px=sum(p[0] for p in eyes)/2;eye_py=sum(p[1] for p in eyes)/2
  e=rig.data.bones['eye.L'].tail_local;eyex=abs(e.x/S);eyey=e.z/S+foot;mouth=morphed[493].y
  sx=(eyes[1][0]-eyes[0][0])/(2*eyex);sy=(lm['mouthCenter'][1]-eye_py)/(eyey-mouth)
@@ -52,23 +54,27 @@ def skin_for_member(role,ob,rig):
  out=n.new('ShaderNodeOutputMaterial');em=n.new('ShaderNodeEmission');links.new(em.outputs[0],out.inputs['Surface'])
  base=n.new('ShaderNodeTexImage');base.image=bpy.data.images.load(str(SYSTEM/'skins/young_caucasian_male/young_lightskinned_male_diffuse.png'),check_existing=True)
  native=n.new('ShaderNodeUVMap');native.uv_map='UVMap';links.new(native.outputs[0],base.inputs['Vector'])
+ tint=n.new('ShaderNodeMixRGB');tint.blend_type='MULTIPLY';tint.inputs[0].default_value=1;tint.inputs[2].default_value=native_tint(role);links.new(base.outputs['Color'],tint.inputs[1])
  face=n.new('ShaderNodeTexImage');face.image=bpy.data.images.load(str(LIK/'facial-atlas-v1.png'),check_existing=True);face.extension='EXTEND'
  uvface=n.new('ShaderNodeUVMap');uvface.uv_map='FaceProjection';links.new(uvface.outputs[0],face.inputs['Vector'])
- attribute=n.new('ShaderNodeVertexColor');attribute.layer_name='FaceMask';mix=n.new('ShaderNodeMixRGB');links.new(attribute.outputs['Color'],mix.inputs[0]);links.new(base.outputs['Color'],mix.inputs[1]);links.new(face.outputs['Color'],mix.inputs[2])
+ attribute=n.new('ShaderNodeVertexColor');attribute.layer_name='FaceMask';mix=n.new('ShaderNodeMixRGB');links.new(attribute.outputs['Color'],mix.inputs[0]);links.new(tint.outputs[0],mix.inputs[1]);links.new(face.outputs['Color'],mix.inputs[2])
  color=mix.outputs[0]
  tattoo=LIK/'tattoo-albedo-v1.png'
  if role=='Drummer' and tattoo.exists():
   tex=n.new('ShaderNodeTexImage');tex.image=bpy.data.images.load(str(tattoo),check_existing=True);uvink=n.new('ShaderNodeUVMap');uvink.uv_map='InkProjection';links.new(uvink.outputs[0],tex.inputs['Vector'])
   masknode=n.new('ShaderNodeVertexColor');masknode.layer_name='InkMask';mixink=n.new('ShaderNodeMixRGB');links.new(masknode.outputs['Color'],mixink.inputs[0]);links.new(color,mixink.inputs[1]);links.new(tex.outputs['Color'],mixink.inputs[2]);color=mixink.outputs[0]
  links.new(color,em.inputs['Color']);ob.data.materials.clear();ob.data.materials.append(m)
- baked=bpy.data.images.new(member+' albedo',width=1536,height=1536,alpha=False);target=n.new('ShaderNodeTexImage');target.image=baked;n.active=target
+ baked=bpy.data.images.new(member+' albedo',width=1024,height=1024,alpha=False);target=n.new('ShaderNodeTexImage');target.image=baked;n.active=target
  ob.data.uv_layers.active=ob.data.uv_layers['UVMap'];ob.data.uv_layers['UVMap'].active_render=True
  bpy.ops.object.select_all(action='DESELECT');ob.select_set(True);bpy.context.view_layer.objects.active=ob
  bpy.context.scene.render.engine='CYCLES';bpy.context.scene.cycles.samples=1;bpy.context.scene.render.bake.margin=12
  bpy.ops.object.bake(type='EMIT')
- path=LIK/'baked'/f'{role.lower()}-albedo.png';baked.filepath_raw=str(path);baked.file_format='PNG';baked.save()
- final=material(member+' skin',path,rough=.7);ob.data.materials.clear();ob.data.materials.append(final)
- ob.data.uv_layers.remove(faceuv);ob.data.uv_layers.remove(inkuv);ob.data.color_attributes.remove(mask);ob.data.color_attributes.remove(ink)
+ path=LIK/'baked'/f'{role.lower()}-albedo.jpg';baked=save_jpeg(baked,path,90)
+ albedo,rough,normal=bake_head(role,ob,rig,m,color,frame)
+ final=material(member+' skin',path,rough=.7);ob.data.materials.clear();ob.data.materials.append(final);ob.data.materials.append(face_material(member,albedo,rough,normal))
+ for poly in ob.data.polygons:poly.material_index=1 if poly.index in heads else 0
+ ob.data.uv_layers.remove(ob.data.uv_layers['FaceProjection']);ob.data.uv_layers.remove(ob.data.uv_layers['InkProjection']);ob.data.color_attributes.remove(ob.data.color_attributes['FaceMask']);ob.data.color_attributes.remove(ob.data.color_attributes['InkMask'])
+ ob.data.uv_layers.active=ob.data.uv_layers['UVMap']
  ob.select_set(False)
 
 def style_garment(role,ob):
@@ -104,7 +110,7 @@ def style_garment(role,ob):
   baked=bpy.data.images.new(MEMBERS[role][0]+' costume',width=1536,height=1536,alpha=False);target=n.new('ShaderNodeTexImage');target.image=baked;n.active=target
   bpy.ops.object.select_all(action='DESELECT');ob.select_set(True);bpy.context.view_layer.objects.active=ob
   bpy.context.scene.render.engine='CYCLES';bpy.context.scene.cycles.samples=1;bpy.context.scene.render.bake.margin=12;bpy.ops.object.bake(type='EMIT')
-  path=LIK/'baked'/f'{role.lower()}-costume.png';baked.filepath_raw=str(path);baked.file_format='PNG';baked.save()
+  path=LIK/'baked'/f'{role.lower()}-costume.jpg';baked=save_jpeg(baked,path,90)
   ob.data.materials.clear();ob.data.materials.append(material(MEMBERS[role][0]+' suit',path,rough=.91));ob.select_set(False)
  elif ob.name.startswith('male_casualsuit'):
   tee=material('Travis white T-shirt',color=(.82,.80,.74,1),rough=.96);pants=material('Travis black trousers',color=(.018,.023,.022,1),rough=.93)
@@ -116,47 +122,6 @@ def rigid_mesh(name,verts,faces,mat,rig,bone='head'):
  vg=o.vertex_groups.new(name=bone);vg.add(list(range(len(verts))),1,'REPLACE');mod=o.modifiers.new('Follow performer','ARMATURE');mod.object=rig
  for p in geo.polygons:p.use_smooth=True
  return o
-
-def member_hair(role,rig):
- hair=material(MEMBERS[role][0]+' hair',color=(.018,.014,.012,1),rough=.86)
- if role=='Guitarist':
-  path=SYSTEM/'hair/short03';h=material('Tom dark fringe',path/'short03_diffuse.png',rough=.86,alpha=True)
-  # Darken the source hair through the texture shader before it is exported.
-  bs=h.node_tree.nodes.get('Principled BSDF');tex=next(n for n in h.node_tree.nodes if n.type=='TEX_IMAGE');mult=h.node_tree.nodes.new('ShaderNodeMixRGB');mult.blend_type='MULTIPLY';mult.inputs[0].default_value=1;mult.inputs[2].default_value=(.12,.09,.075,1);h.node_tree.links.new(tex.outputs['Color'],mult.inputs[1]);h.node_tree.links.new(mult.outputs[0],bs.inputs['Base Color'])
-  garment(path,'short03',rig,h)
-  return
- # Anatomical scalp shell with a raised, irregular silhouette.
- rawfaces=[]
- for g,f in faces:
-  if g!='body':continue
-  c=sum((morphed[i] for i,j in f),Vector())/len(f)
-  keep=(c.y>8.55 or c.y>8.2 and c.z<.5) if role=='Bassist' else abs(c.x)<.20 and (c.y>8.6 or c.y>7.85 and c.z<.05)
-  if keep:rawfaces.append((g,f))
- cap=[v.copy() for v in morphed]
- for p in cap:
-  if p.y>7.7:p.x*=1.015;p.z=.45+(p.z-.45)*1.015;p.y+=.035
- weights_hair={i:{'head':1} for i in range(len(cap))};mesh(MEMBERS[role][0]+' hair cap',cap,uv,rawfaces,hair,rig,weights_hair)
- rng=random.Random(72 if role=='Bassist' else 18);vertices=[];polys=[]
- count=680 if role=='Bassist' else 170
- # Anchor every tuft to the fitted scalp, including its actual front/back depth.
- candidates=[]
- for _,f in rawfaces:
-  pts=[conv(morphed[i]) for i,j in f];c=sum(pts,Vector())/len(pts)
-  normal=(pts[1]-pts[0]).cross(pts[2]-pts[0]).normalized()
-  if normal.z>.15 or role=='Drummer':candidates.append((c,normal))
- for k in range(count):
-  c,normal=rng.choice(candidates);root=c+normal*.008
-  if role=='Bassist':
-   root+=Vector((rng.uniform(-.009,.009),rng.uniform(-.009,.009),0));height=rng.uniform(.023,.063);tip=root+Vector((normal.x*.03,-.02,height));radius=rng.uniform(.003,.007)
-  else:
-   root.x*=.7;tip=root+normal*.045+Vector((0,-.006,.043+rng.uniform(0,.022)));radius=.006
-  axis=(tip-root).normalized();a=axis.cross(Vector((0,1,0))).normalized();b=axis.cross(a);start=len(vertices)
-  for ring,factor in [(0,1),(.42,.62),(1,.018)]:
-   p=root.lerp(tip,ring)
-   for j in range(5):vertices.append(p+radius*factor*(math.cos(j*math.tau/5)*a+math.sin(j*math.tau/5)*b))
-  for ring in range(2):
-   for j in range(5):polys.append((start+ring*5+j,start+ring*5+(j+1)%5,start+(ring+1)*5+(j+1)%5,start+(ring+1)*5+j))
- rigid_mesh(MEMBERS[role][0]+' hairstyle',vertices,polys,hair,rig)
 
 def suspenders(rig,body):
  blackstrap=material('Travis suspenders',color=(.012,.015,.015,1),rough=.86)
@@ -174,14 +139,3 @@ def suspenders(rig,body):
  o=rigid_mesh('Travis black suspenders',verts,polys,blackstrap,rig,'spine01');o.vertex_groups.clear()
  for i,n in enumerate(weights_out):
   vg=o.vertex_groups.get(n) or o.vertex_groups.new(name=n);vg.add([i],1,'REPLACE')
-
-def member_eyes(role,ob):
- # The CC0 base iris is strongly orange. Retain its iris fibres and sclera,
- # with a cool light iris for Mark and subdued brown for Tom and Travis.
- m=bpy.data.materials.new(MEMBERS[role][0]+' iris bake');m.use_nodes=True;n=m.node_tree.nodes;n.clear();links=m.node_tree.links
- out=n.new('ShaderNodeOutputMaterial');em=n.new('ShaderNodeEmission');links.new(em.outputs[0],out.inputs['Surface'])
- tex=n.new('ShaderNodeTexImage');tex.image=bpy.data.images.load(str(SRC/'brown_eye.png'),check_existing=True)
- hsv=n.new('ShaderNodeHueSaturation');hsv.inputs['Hue'].default_value=.02 if role=='Bassist' else .5;hsv.inputs['Saturation'].default_value=.38;hsv.inputs['Value'].default_value=.8;links.new(tex.outputs['Color'],hsv.inputs['Color']);links.new(hsv.outputs[0],em.inputs['Color'])
- ob.data.materials.clear();ob.data.materials.append(m);baked=bpy.data.images.new(MEMBERS[role][0]+' eyes',width=512,height=512,alpha=False);target=n.new('ShaderNodeTexImage');target.image=baked;n.active=target
- bpy.ops.object.select_all(action='DESELECT');ob.select_set(True);bpy.context.view_layer.objects.active=ob;bpy.ops.object.bake(type='EMIT')
- path=LIK/'baked'/f'{role.lower()}-eyes.png';baked.filepath_raw=str(path);baked.file_format='PNG';baked.save();ob.data.materials.clear();ob.data.materials.append(material(MEMBERS[role][0]+' eyes',path,rough=.3));ob.select_set(False)

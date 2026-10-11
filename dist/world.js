@@ -1,7 +1,7 @@
 import * as T from './vendor/three.module.js';
 import {createSpider,createViewLegs} from './spider.js?v=6';
-import {loadMusicians,loadFurniture} from './musicians.js?v=6';
-import {createAlcove} from './alcove.js?v=6';
+import {loadMusicians,loadFurniture} from './musicians.js?v=8';
+import {createAlcove} from './alcove.js?v=8';
 import {mergeGeometries} from './vendor/BufferGeometryUtils.js';
 import {NODES,cycleAt,birdBlocking} from './rules.js';
 const V=(x,y,z)=>new T.Vector3(x,y,z);
