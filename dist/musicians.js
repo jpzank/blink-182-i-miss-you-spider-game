@@ -21,6 +21,15 @@ export function loadMusicians(scene){
     if(mat.name.includes('shoes'))mat.color.set('#24231f');
    });
   });
+  // Strand cards: an alpha-tested core writes depth, and a blended copy
+  // drawn afterwards softens the cut-out edges (the composer has no MSAA).
+  // Both skip the SSAO normal pass, which would see whole card rectangles.
+  const cards=[];root.traverse(o=>{if(o.isMesh&&(o.material.name.endsWith(' hair')||o.material.name==='Band eyelashes'))cards.push(o);});
+  for(const o of cards){
+   o.userData.noSSAO=true;o.material.alphaTest=Math.max(o.material.alphaTest,.5);
+   const edge=o.clone();edge.material=o.material.clone();Object.assign(edge.material,{alphaTest:.04,transparent:true,depthWrite:false});
+   edge.castShadow=false;edge.userData.noSSAO=true;o.parent.add(edge);
+  }
   for(const [role,start,end] of [['Bassist',28,79],['Guitarist',80,219]]){
    const rig=root.getObjectByName(role);let jaw,neck;
    rig?.traverse(o=>{if(o.isBone&&o.name.startsWith('jaw'))jaw=o;if(o.isBone&&o.name.startsWith('neck01'))neck=o;});
