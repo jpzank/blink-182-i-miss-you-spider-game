@@ -8,7 +8,7 @@
 | Reclining figures | `assets-src/reclining-women/reclining-women.blend` | `scripts/build-reclining-women.py` | `dist/models/reclining-women-v6.glb` |
 | Sphynx | `assets-src/sphynx/sphynx.blend` | `scripts/build-sphynx.py` | `dist/models/sphynx-v6.glb` |
 
-The public Blender scenes have packed image resources and relative paths. Source maps are also included for painting and rebuilding. The builders were tested with Blender 5.1.2; use `blender -b --python <script>` from the project root. They regenerate meshes and exports, so manual Blender edits should be preserved on a branch before rerunning a builder.
+The Blender scenes embed their image data and keep both image paths and packed-resource source paths relative to the project tree. Keep those fields, render output paths, and any File Browser workspace paths free of workstation-specific directories before saving a source file. Source maps are also included for painting and rebuilding. The builders were tested with Blender 5.1.2; use `blender -b --python <script>` from the project root. They regenerate meshes and exports, so manual Blender edits should be preserved on a branch before rerunning a builder.
 
 The spider, bed and much of the environment are procedural JavaScript geometry, so edit their runtime modules directly. Furniture comes from the credited Poly Haven models.
 
